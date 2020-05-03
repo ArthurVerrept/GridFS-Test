@@ -8,8 +8,11 @@ const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 var handlebars = require('express-handlebars');
 
-
-
+const Schema = mongoose.Schema;
+const Image = mongoose.model("Image",
+            new Schema({filename : String, contentType : String, uploadDate : Date}),
+            "fs.files"
+            );
 
 const app = express();
 
@@ -81,25 +84,13 @@ app.post('/upload', upload.single('file'), (req, res) => {
 // route GET files
 app.get('/files/:filename', (req, res) => {
     gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
-        const readstream = gfs.createReadStream(file.filename);
-        readstream.pipe(res);
     })
 })
 
 
-app.get('/', (req, res) => {
-    gfs.files.find().toArray((err, files) => {
-        // check if files exist
-        if(!files || files.length == 0){
-            res.render('index', {files: false})
-        } else { 
-            files.map(file => {
-            res.render('index', {layout: 'main', files:file});
-            })
-        }
-    });
-});
-
+  app.get('/', (req, res) => {
+      res.render('index', {layout:'main', files: files[0].filename});
+  });
 
 const port = 3000;
 
